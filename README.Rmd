@@ -1,0 +1,79 @@
+---
+title: "Exploratory data analysis"
+output: github_document
+always_allow_html: yes
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(skimr)
+library(caret)
+require(RANN)
+```
+
+## This is a note to self for exploratory data analysis.
+
+I decided to use the orange dataset.
+
+1- Loading the data:
+
+```{r}
+orange <- read.csv('https://raw.githubusercontent.com/selva86/datasets/master/orange_juice_withmissing.csv')
+
+```
+
+
+Let's have a look at the data:
+
+```{r}
+str(orange)
+glimpse(orange)
+head(orange)
+summary(orange)
+```
+
+This is how like to check NAs, histograms, etc:
+
+```{r}
+orange%>%
+  skimr::skim_to_wide() %>%
+  kableExtra::kable() %>%
+  kableExtra::kable_styling()
+```
+
+
+Analysing categorical vars
+
+```{r}
+levels(orange$Purchase)
+```
+
+Categorical vars can be checked against each other
+
+```{r}
+table(orange$Purchase, orange$Store7)
+```
+
+According to skimr report the number of NAs is not propertional to size of the dataset. As a result, we can we can use knnImpute to fix the NAs
+
+```{r}
+preProcessMissingModel <- caret::preProcess(orange, method = 'knnImpute')
+
+require(RANN)
+orange <- predict(preProcessMissingModel, newdata = orange)
+```
+
+Checking whether we have any NAs
+```{r}
+anyNA(orange)
+```
+
+Let's look at the data again:
+
+```{r}
+orange%>%
+  skimr::skim_to_wide() %>%
+  kableExtra::kable() %>%
+  kableExtra::kable_styling()
+```
