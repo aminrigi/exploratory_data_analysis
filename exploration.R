@@ -60,6 +60,26 @@ orange%>%
 require(moments)
 skewness(orange$STORE)
 
+orange %>% 
+  select(-Purchase, -Store7) %>% #exclusing categorical vars
+  skewness() %>% 
+  View()
+
+#Skewness can be visualised as well:
+
+skewness.info <- orange %>% 
+  select(-Purchase, -Store7) %>% #exclusing categorical vars
+  skewness() %>% 
+  data.frame()
+
+skewness.info$Variables <- rownames(skewness.info)
+colnames(skewness.info) <- c("Skewness", "Variable")
+
+skewness.info %>% 
+  ggplot(aes(x=Variable, y=Skewness))+
+  geom_bar(stat = "identity", fill="darkgreen", alpha=.7)+
+  coord_flip()
+
 #positive skewness means it's skewed towards right.
 
 
@@ -83,6 +103,13 @@ orange$PctDiscMM_log <- orange$PctDiscMM
 #or alternatively 
 #orange %>% 
 #  mutate(PctDiscMM.log = log(PctDiscMM))
+
+
+
+# After transformation, we need to check for outliers
+# let's
+
+
 
 
 
