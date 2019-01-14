@@ -115,3 +115,22 @@ orange$PctDiscMM_log <- orange$PctDiscMM
 
 
 
+
+# Analysis of variance
+# Let's assume there's a dependent variable and a few independent var
+# ANOVA is easy
+
+aov.ex <- aov(orange$PriceDiff~orange$PriceCH*orange$SpecialCH*orange$ListPriceDiff)
+summary(aov.ex)
+
+# the starts next to the variables show the significant variables.
+
+
+
+
+
+
+
+
+
+
