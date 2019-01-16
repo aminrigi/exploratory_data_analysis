@@ -2100,3 +2100,105 @@ NA
 </tr>
 </tbody>
 </table>
+Visually, we can detect some of the variables are skewed, but let's do it automatically. We are going to use moments library.
+
+``` r
+require(moments)
+```
+
+    ## Loading required package: moments
+
+    ## Warning: package 'moments' was built under R version 3.5.2
+
+``` r
+skewness.info <- orange %>% 
+  select(-Purchase, -Store7) %>% #exclusing categorical vars
+  skewness() %>% 
+  data.frame()
+
+skewness.info$Variables <- rownames(skewness.info)
+colnames(skewness.info) <- c("Skewness", "Variable")
+
+skewness.info %>% 
+  ggplot(aes(x=Variable, y=Skewness))+
+  geom_bar(stat = "identity", fill="darkgreen", alpha=.7)+
+  coord_flip()
+```
+
+![](README_files/figure-markdown_github/unnamed-chunk-9-1.png)
+
+Positive skewness means it's skewed towards right.
+
+A next step would be to transorm some variables. PctDiscMM is a good candidate, according to the skewness plot. Let's have a look at its density:
+
+``` r
+orange %>% 
+  ggplot(aes(x=PctDiscMM))+
+  geom_density(fill="darkgreen", alpha=.4)
+```
+
+![](README_files/figure-markdown_github/unnamed-chunk-10-1.png)
+
+Same variable after log transform:
+
+``` r
+orange %>% 
+  ggplot(aes(x=log(PctDiscMM)))+
+  geom_density(fill="darkgreen", alpha=.4)
+```
+
+    ## Warning in log(PctDiscMM): NaNs produced
+
+    ## Warning in log(PctDiscMM): NaNs produced
+
+    ## Warning: Removed 770 rows containing non-finite values (stat_density).
+
+![](README_files/figure-markdown_github/unnamed-chunk-11-1.png)
+
+And after square root transformation:
+
+``` r
+orange %>% 
+  ggplot(aes(x=sqrt(PctDiscMM)))+
+  geom_density(fill="darkgreen", alpha=.4)
+```
+
+    ## Warning in sqrt(PctDiscMM): NaNs produced
+
+    ## Warning in sqrt(PctDiscMM): NaNs produced
+
+    ## Warning: Removed 770 rows containing non-finite values (stat_density).
+
+![](README_files/figure-markdown_github/unnamed-chunk-12-1.png)
+
+A next step would be to check for outliers. \[will be added later..\]
+
+Analysis of variance. Let's assume there's a dependent variable and a few independent var. ANOVA is easy
+
+``` r
+aov.ex <- aov(orange$PriceDiff~orange$PriceCH*orange$SpecialCH*orange$ListPriceDiff)
+summary(aov.ex)
+```
+
+    ##                                                        Df Sum Sq Mean Sq
+    ## orange$PriceCH                                          1    9.9    9.88
+    ## orange$SpecialCH                                        1   15.3   15.31
+    ## orange$ListPriceDiff                                    1  209.7  209.67
+    ## orange$PriceCH:orange$SpecialCH                         1    0.0    0.03
+    ## orange$PriceCH:orange$ListPriceDiff                     1    5.6    5.58
+    ## orange$SpecialCH:orange$ListPriceDiff                   1   13.9   13.85
+    ## orange$PriceCH:orange$SpecialCH:orange$ListPriceDiff    1   63.7   63.71
+    ## Residuals                                            1062  750.4    0.71
+    ##                                                      F value   Pr(>F)    
+    ## orange$PriceCH                                        13.990 0.000194 ***
+    ## orange$SpecialCH                                      21.665 3.66e-06 ***
+    ## orange$ListPriceDiff                                 296.745  < 2e-16 ***
+    ## orange$PriceCH:orange$SpecialCH                        0.036 0.849476    
+    ## orange$PriceCH:orange$ListPriceDiff                    7.900 0.005035 ** 
+    ## orange$SpecialCH:orange$ListPriceDiff                 19.608 1.05e-05 ***
+    ## orange$PriceCH:orange$SpecialCH:orange$ListPriceDiff  90.171  < 2e-16 ***
+    ## Residuals                                                                
+    ## ---
+    ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+The stars next to the variables show the significant variables.

@@ -77,3 +77,69 @@ orange%>%
   kableExtra::kable() %>%
   kableExtra::kable_styling()
 ```
+
+Visually, we can detect some of the variables are skewed, but let's do it automatically. We are going to use moments library. 
+```{r}
+require(moments)
+
+skewness.info <- orange %>% 
+  select(-Purchase, -Store7) %>% #exclusing categorical vars
+  skewness() %>% 
+  data.frame()
+
+skewness.info$Variables <- rownames(skewness.info)
+colnames(skewness.info) <- c("Skewness", "Variable")
+
+skewness.info %>% 
+  ggplot(aes(x=Variable, y=Skewness))+
+  geom_bar(stat = "identity", fill="darkgreen", alpha=.7)+
+  coord_flip()
+
+```
+
+Positive skewness means it's skewed towards right.
+
+
+
+A next step would be to transorm some variables. PctDiscMM is a good candidate, according to the skewness plot. Let's have a look at its density:
+
+```{r}
+orange %>% 
+  ggplot(aes(x=PctDiscMM))+
+  geom_density(fill="darkgreen", alpha=.4)
+```
+
+Same variable after log transform:
+```{r}
+orange %>% 
+  ggplot(aes(x=log(PctDiscMM)))+
+  geom_density(fill="darkgreen", alpha=.4)
+```
+
+And after square root transformation:
+
+```{r}
+orange %>% 
+  ggplot(aes(x=sqrt(PctDiscMM)))+
+  geom_density(fill="darkgreen", alpha=.4)
+```
+
+
+A next step would be to check for outliers. [will be added later..]
+
+
+
+Analysis of variance. Let's assume there's a dependent variable and a few independent var. ANOVA is easy
+
+
+
+```{r}
+aov.ex <- aov(orange$PriceDiff~orange$PriceCH*orange$SpecialCH*orange$ListPriceDiff)
+summary(aov.ex)
+
+```
+
+The stars next to the variables show the significant variables.
+
+
+
